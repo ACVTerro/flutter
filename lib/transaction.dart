@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:tipidbuddy/search.dart';
+import 'package:tipidbuddy/add_transaction_page.dart';
+import 'package:intl/intl.dart';
 
 class TransactionPage extends StatefulWidget {
   const TransactionPage({super.key});
@@ -22,6 +24,7 @@ class _TransactionPageState extends State<TransactionPage>
   ];
 
   final List<String> _notes = [];
+  final List<Map<String, dynamic>> _transactions = [];
 
   @override
   void initState() {
@@ -112,24 +115,76 @@ class _TransactionPageState extends State<TransactionPage>
               child: TabBarView(
                 controller: _tabController,
                 children: [
-                  ListView(
-                    children: const [
-                      ListTile(
-                        leading: Icon(
-                          Icons.arrow_downward_rounded,
-                          color: Color(0xFF22C55E),
-                        ),
-                        title: Text('Income'),
+                    ListView.builder(
+                        itemCount: _transactions.length + 1,
+                        itemBuilder: (context, index) {
+                          // 🔵 HEADER ROW
+                          if (index == 0) {
+                            return Container(
+                              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                              color: const Color(0xFF1E2745),
+                              child: const Row(
+                                children: [
+                                  Expanded(flex: 2, child: Text('Category')),
+                                  Expanded(flex: 3, child: Text('Note')),
+                                  Expanded(flex: 2, child: Text('Income', textAlign: TextAlign.right)),
+                                  Expanded(flex: 2, child: Text('Expense', textAlign: TextAlign.right)),
+                                ],
+                              ),
+                            );
+                          }
+
+                          final t = _transactions[index - 1];
+                          final date = t['date'];
+
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // 🔵 DATE (above row)
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                child: Text(
+                                  DateFormat('MMMM d, yyyy  |  h:mm a')
+                                            .format(date.toLocal())
+                                            .replaceAll('AM', 'am')
+                                            .replaceAll('PM', 'pm'),
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.white70,
+                                  ),
+                                ),
+                              ),
+
+                              // 🔵 TRANSACTION ROW
+                              Container(
+                                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                                child: Row(
+                                  children: [
+                                    Expanded(flex: 2, child: Text(t['category'] ?? '')),
+                                    Expanded(flex: 3, child: Text(t['note'] ?? '')),
+                                    Expanded(
+                                      flex: 2,
+                                      child: Text(
+                                        (t['income'] ?? 0) > 0 ? t['income'].toString() : '',
+                                        textAlign: TextAlign.right,
+                                        style: const TextStyle(color: Color(0xFF22C55E)),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      flex: 2,
+                                      child: Text(
+                                        (t['expense'] ?? 0) > 0 ? t['expense'].toString() : '',
+                                        textAlign: TextAlign.right,
+                                        style: const TextStyle(color: Color(0xFFEF4444)),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          );
+                        },
                       ),
-                      ListTile(
-                        leading: Icon(
-                          Icons.arrow_upward_rounded,
-                          color: Color(0xFFEF4444),
-                        ),
-                        title: Text('Expenses'),
-                      ),
-                    ],
-                  ),
                   TableCalendar(
                     firstDay: DateTime.utc(2020, 1, 1),
                     lastDay: DateTime.utc(2030, 12, 31),
@@ -167,18 +222,29 @@ class _TransactionPageState extends State<TransactionPage>
               ),
             ),
             if (_tabController.index == 0 || _tabController.index == 1)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8, top: 8),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      debugPrint('Add Transaction Pressed');
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8, top: 8),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () async {
+                      final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const AddTransactionPage(),
+                        ),
+                      );
+
+                      if (result != null) {
+                        setState(() {
+                          _transactions.add(result);
+                        });
+                      }
                     },
-                    child: const Text('Add Transaction'),
-                  ),
+                  child: const Text('Add Transaction'),
                 ),
               ),
+            ),
           ],
         ),
       ),
