@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:tipidbuddy/search.dart';
 import 'package:tipidbuddy/add_transaction_page.dart';
+import 'package:tipidbuddy/backend/services/transactions_services.dart';
 import 'package:intl/intl.dart';
 
 class TransactionPage extends StatefulWidget {
@@ -14,6 +15,10 @@ class TransactionPage extends StatefulWidget {
 class _TransactionPageState extends State<TransactionPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  List<Map<String, dynamic>> _transactions = [];
+  double _totalIncome = 0;
+  double _totalExpense = 0;
+  bool _loading = true;
 
   final List<String> _dailyItems = [
     'Salary',
@@ -22,17 +27,35 @@ class _TransactionPageState extends State<TransactionPage>
     'Rent',
     'Utilities',
   ];
-
   final List<String> _notes = [];
-  final List<Map<String, dynamic>> _transactions = [];
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    _tabController.addListener(() {
-      setState(() {});
-    });
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    if (!mounted) return;
+    setState(() => _loading = true);
+    final data = await TransactionServices.getAllbyCategories();
+    double income = 0, expense = 0;
+    for (var t in data) {
+      if (t['type'] == 'income') {
+        income += t['amount'];
+      } else {
+        expense += t['amount'];
+      }
+    }
+    if (mounted) {
+      setState(() {
+        _transactions = data;
+        _totalIncome = income;
+        _totalExpense = expense;
+        _loading = false;
+      });
+    }
   }
 
   @override
@@ -102,12 +125,12 @@ class _TransactionPageState extends State<TransactionPage>
               color: const Color(0xFF151C33),
               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
               width: double.infinity,
-              child: const Row(
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Income: 0', style: TextStyle(color: Color(0xFF22C55E))),
-                  Text('Expenses: 0', style: TextStyle(color: Color(0xFFEF4444))),
-                  Text('Total: 0'),
+                  Text('Income: ${_totalIncome.toStringAsFixed(2)}', style: const TextStyle(color: Color(0xFF22C55E))),
+                  Text('Expenses: ${_totalExpense.toStringAsFixed(2)}', style: const TextStyle(color: Color(0xFFEF4444))),
+                  Text('Total: ${(_totalIncome - _totalExpense).toStringAsFixed(2)}'),
                 ],
               ),
             ),
@@ -115,76 +138,71 @@ class _TransactionPageState extends State<TransactionPage>
               child: TabBarView(
                 controller: _tabController,
                 children: [
-                    ListView.builder(
-                        itemCount: _transactions.length + 1,
-                        itemBuilder: (context, index) {
-                          // 🔵 HEADER ROW
-                          if (index == 0) {
-                            return Container(
-                              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-                              color: const Color(0xFF1E2745),
-                              child: const Row(
-                                children: [
-                                  Expanded(flex: 2, child: Text('Category')),
-                                  Expanded(flex: 3, child: Text('Note')),
-                                  Expanded(flex: 2, child: Text('Income', textAlign: TextAlign.right)),
-                                  Expanded(flex: 2, child: Text('Expense', textAlign: TextAlign.right)),
-                                ],
-                              ),
-                            );
-                          }
-
-                          final t = _transactions[index - 1];
-                          final date = t['date'];
-
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // 🔵 DATE (above row)
-                              Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                child: Text(
-                                  DateFormat('MMMM d, yyyy  |  h:mm a')
-                                            .format(date.toLocal())
-                                            .replaceAll('AM', 'am')
-                                            .replaceAll('PM', 'pm'),
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.white70,
-                                  ),
-                                ),
-                              ),
-
-                              // 🔵 TRANSACTION ROW
-                              Container(
-                                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-                                child: Row(
+                  _loading
+                      ? const Center(child: CircularProgressIndicator())
+                      : ListView.builder(
+                          itemCount: _transactions.length + 1,
+                          itemBuilder: (context, index) {
+                            if (index == 0) {
+                              return Container(
+                                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                                color: const Color(0xFF1E2745),
+                                child: const Row(
                                   children: [
-                                    Expanded(flex: 2, child: Text(t['category'] ?? '')),
-                                    Expanded(flex: 3, child: Text(t['note'] ?? '')),
-                                    Expanded(
-                                      flex: 2,
-                                      child: Text(
-                                        (t['income'] ?? 0) > 0 ? t['income'].toString() : '',
-                                        textAlign: TextAlign.right,
-                                        style: const TextStyle(color: Color(0xFF22C55E)),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      flex: 2,
-                                      child: Text(
-                                        (t['expense'] ?? 0) > 0 ? t['expense'].toString() : '',
-                                        textAlign: TextAlign.right,
-                                        style: const TextStyle(color: Color(0xFFEF4444)),
-                                      ),
-                                    ),
+                                    Expanded(flex: 2, child: Text('Category')),
+                                    Expanded(flex: 3, child: Text('Note')),
+                                    Expanded(flex: 2, child: Text('Income', textAlign: TextAlign.right)),
+                                    Expanded(flex: 2, child: Text('Expense', textAlign: TextAlign.right)),
                                   ],
                                 ),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
+                              );
+                            }
+                            final t = _transactions[index - 1];
+                            final isIncome = t['type'] == 'income';
+                            final amount = t['amount'];
+                            final date = DateTime.parse(t['transact_date']);
+                            final categoryName = t['category_name'] ?? '';
+                            final note = t['note'] ?? '';
+
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  child: Text(
+                                    DateFormat('MMMM d, yyyy').format(date),
+                                    style: const TextStyle(fontSize: 12, color: Colors.white70),
+                                  ),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                                  child: Row(
+                                    children: [
+                                      Expanded(flex: 2, child: Text(categoryName)),
+                                      Expanded(flex: 3, child: Text(note)),
+                                      Expanded(
+                                        flex: 2,
+                                        child: Text(
+                                          isIncome ? amount.toStringAsFixed(2) : '',
+                                          textAlign: TextAlign.right,
+                                          style: const TextStyle(color: Color(0xFF22C55E)),
+                                        ),
+                                      ),
+                                      Expanded(
+                                        flex: 2,
+                                        child: Text(
+                                          !isIncome ? amount.toStringAsFixed(2) : '',
+                                          textAlign: TextAlign.right,
+                                          style: const TextStyle(color: Color(0xFFEF4444)),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
                   TableCalendar(
                     firstDay: DateTime.utc(2020, 1, 1),
                     lastDay: DateTime.utc(2030, 12, 31),
@@ -222,29 +240,24 @@ class _TransactionPageState extends State<TransactionPage>
               ),
             ),
             if (_tabController.index == 0 || _tabController.index == 1)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8, top: 8),
-              child: SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () async {
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8, top: 8),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () async {
                       final result = await Navigator.push(
                         context,
-                        MaterialPageRoute(
-                          builder: (context) => const AddTransactionPage(),
-                        ),
+                        MaterialPageRoute(builder: (context) => const AddTransactionPage()),
                       );
-
-                      if (result != null) {
-                        setState(() {
-                          _transactions.add(result);
-                        });
+                      if (result == true) {
+                        _loadData();
                       }
                     },
-                  child: const Text('Add Transaction'),
+                    child: const Text('Add Transaction'),
+                  ),
                 ),
               ),
-            ),
           ],
         ),
       ),

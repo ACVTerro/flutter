@@ -1,29 +1,61 @@
 import 'package:flutter/material.dart';
+import 'package:tipidbuddy/backend/services/transactions_services.dart';
+import 'package:intl/intl.dart';
 
-class StatsPage extends StatelessWidget {
+class StatsPage extends StatefulWidget {
   const StatsPage({super.key});
 
-  static const List<_MonthlyStat> _rows = [
-    _MonthlyStat('Jan', 42000, 28000),
-    _MonthlyStat('Feb', 38000, 25000),
-    _MonthlyStat('Mar', 45000, 29500),
-    _MonthlyStat('Apr', 47000, 31000),
-  ];
+  @override
+  State<StatsPage> createState() => _StatsPageState();
+}
+
+class _StatsPageState extends State<StatsPage> {
+  List<_MonthlyStat> _monthlyStats = [];
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadStats();
+  }
+
+  Future<void> _loadStats() async {
+    List<_MonthlyStat> stats = [];
+    final now = DateTime.now();
+    for (int i = 5; i >= 0; i--) {
+      final date = DateTime(now.year, now.month - i, 1);
+      final monthStr = DateFormat('yyyy-MM').format(date);
+      final summary = await TransactionServices.monthlySummary(monthStr);
+      stats.add(_MonthlyStat(
+        month: DateFormat('MMM').format(date),
+        income: summary['income'] ?? 0.0,
+        expenses: summary['expense'] ?? 0.0,
+      ));
+    }
+    if (mounted) {
+      setState(() {
+        _monthlyStats = stats;
+        _loading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: ListView(
-          children: [
-            _buildHeader(context),
-            const SizedBox(height: 12),
-            _buildGraphCard(context),
-            const SizedBox(height: 16),
-            _buildMonthlyTable(),
-          ],
-        ),
+        child: _loading
+            ? const Center(child: CircularProgressIndicator())
+            : ListView(
+                children: [
+                  _buildHeader(context),
+                  const SizedBox(height: 12),
+                  _buildGraphCard(context),
+                  const SizedBox(height: 16),
+                  _buildMonthlyTable(),
+                ],
+              ),
       ),
     );
   }
@@ -74,7 +106,16 @@ class StatsPage extends StatelessWidget {
   }
 
   Widget _buildGraphCard(BuildContext context) {
-    final maxValue = _rows
+    if (_monthlyStats.isEmpty) {
+      return const Card(
+        color: Color(0xFF151C33),
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: Center(child: Text('No data yet')),
+        ),
+      );
+    }
+    final maxValue = _monthlyStats
         .map((entry) => entry.income > entry.expenses ? entry.income : entry.expenses)
         .reduce((a, b) => a > b ? a : b);
 
@@ -98,7 +139,7 @@ class StatsPage extends StatelessWidget {
               height: 180,
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
-                children: _rows
+                children: _monthlyStats
                     .map((entry) => Expanded(
                           child: _MonthBars(entry: entry, maxValue: maxValue),
                         ))
@@ -136,7 +177,7 @@ class StatsPage extends StatelessWidget {
               isHeader: true,
             ),
             const Divider(height: 14, color: Color(0xFF1E2745)),
-            ..._rows.map((entry) {
+            ..._monthlyStats.map((entry) {
               return Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: _TableRow(
@@ -239,8 +280,14 @@ class _MonthBars extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final incomeRatio = entry.income / maxValue;
-    final expenseRatio = entry.expenses / maxValue;
+    // Use absolute value of maxValue for scaling, and clamp ratios between 0 and 1
+    final positiveMax = maxValue.abs();
+    double incomeRatio = 0.0;
+    double expenseRatio = 0.0;
+    if (positiveMax > 0) {
+      incomeRatio = (entry.income / positiveMax).clamp(0.0, 1.0);
+      expenseRatio = (entry.expenses / positiveMax).clamp(0.0, 1.0);
+    }
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
@@ -282,7 +329,7 @@ class _MonthlyStat {
   final double income;
   final double expenses;
 
-  const _MonthlyStat(this.month, this.income, this.expenses);
+  const _MonthlyStat({required this.month, required this.income, required this.expenses});
 
   double get total => income - expenses;
 }

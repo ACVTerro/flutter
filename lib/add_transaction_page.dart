@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:tipidbuddy/backend/models/categories.dart';
+import 'package:tipidbuddy/backend/models/transactions.dart';
+import 'package:tipidbuddy/backend/services/categories_services.dart';
+import 'package:tipidbuddy/backend/services/transactions_services.dart';
+import 'package:intl/intl.dart';
 
 class AddTransactionPage extends StatefulWidget {
   const AddTransactionPage({super.key});
@@ -8,93 +13,149 @@ class AddTransactionPage extends StatefulWidget {
 }
 
 class _AddTransactionPageState extends State<AddTransactionPage> {
-  final TextEditingController _incomeController = TextEditingController();
-  final TextEditingController _expenseController = TextEditingController();
-  final TextEditingController _categoryController = TextEditingController();
-  final TextEditingController _noteController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  final _amountController = TextEditingController();
+  final _noteController = TextEditingController();
+
+  String _type = 'expense';
+  CategoriesModel? _selectedCategory;
+  DateTime _date = DateTime.now();
+
+  List<CategoriesModel> _incomeCategories = [];
+  List<CategoriesModel> _expenseCategories = [];
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCategories();
+  }
+
+  @override
+  void dispose() {
+    _amountController.dispose();
+    _noteController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadCategories() async {
+    final all = await CategoryServices.getAll();
+    if (mounted) {
+      setState(() {
+        _incomeCategories = all.where((c) => c.type == 'income').toList();
+        _expenseCategories = all.where((c) => c.type == 'expense').toList();
+        _loading = false;
+      });
+    }
+  }
+
+  Future<void> _saveTransaction() async {
+    if (!_formKey.currentState!.validate()) return;
+    if (_selectedCategory == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select a category')),
+      );
+      return;
+    }
+
+    final amount = double.tryParse(_amountController.text) ?? 0;
+    if (amount <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a valid amount')),
+      );
+      return;
+    }
+
+    final transaction = TransactionsModel(
+      amount: amount,
+      categoryID: _selectedCategory!.id!,
+      note: _noteController.text.isEmpty ? null : _noteController.text,
+      date: DateFormat('yyyy-MM-dd').format(_date),
+    );
+
+    await TransactionServices.insert(transaction);
+    if (mounted) Navigator.pop(context, true);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Add Transaction')),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            // INCOME
-            TextField(
-              controller: _incomeController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Income',
-                border: OutlineInputBorder(),
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : Padding(
+              padding: const EdgeInsets.all(16),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    SegmentedButton<String>(
+                      segments: const [
+                        ButtonSegment(value: 'expense', label: Text('Expense'), icon: Icon(Icons.remove_circle_outline)),
+                        ButtonSegment(value: 'income', label: Text('Income'), icon: Icon(Icons.add_circle_outline)),
+                      ],
+                      selected: {_type},
+                      onSelectionChanged: (Set<String> newSelection) {
+                        setState(() {
+                          _type = newSelection.first;
+                          _selectedCategory = null;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _amountController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(labelText: 'Amount', border: OutlineInputBorder()),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) return 'Enter amount';
+                        if (double.tryParse(value) == null) return 'Enter valid number';
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<CategoriesModel>(
+                      value: _selectedCategory,
+                      isExpanded: true,
+                      decoration: const InputDecoration(labelText: 'Category', border: OutlineInputBorder()),
+                      items: (_type == 'income' ? _incomeCategories : _expenseCategories).map((c) {
+                        return DropdownMenuItem(value: c, child: Text(c.label));
+                      }).toList(),
+                      onChanged: (value) => setState(() => _selectedCategory = value),
+                      validator: (value) => value == null ? 'Select category' : null,
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _noteController,
+                      decoration: const InputDecoration(labelText: 'Note (optional)', border: OutlineInputBorder()),
+                    ),
+                    const SizedBox(height: 12),
+                    ListTile(
+                      title: const Text('Date'),
+                      subtitle: Text(DateFormat('MMMM d, yyyy').format(_date)),
+                      trailing: const Icon(Icons.calendar_today),
+                      onTap: () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: _date,
+                          firstDate: DateTime(2020),
+                          lastDate: DateTime.now(),
+                        );
+                        if (picked != null) setState(() => _date = picked);
+                      },
+                    ),
+                    const Spacer(),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: _saveTransaction,
+                        child: const Text('Save Transaction'),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-
-            const SizedBox(height: 10),
-
-            // EXPENSE
-            TextField(
-              controller: _expenseController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Expense',
-                border: OutlineInputBorder(),
-              ),
-            ),
-
-            const SizedBox(height: 10),
-
-            // CATEGORY
-            TextField(
-              controller: _categoryController,
-              decoration: const InputDecoration(
-                labelText: 'Category',
-                border: OutlineInputBorder(),
-              ),
-            ),
-
-            const SizedBox(height: 10),
-
-            // NOTE
-            TextField(
-              controller: _noteController,
-              decoration: const InputDecoration(
-                labelText: 'Note',
-                border: OutlineInputBorder(),
-              ),
-            ),
-
-            const Spacer(),
-
-            // SAVE BUTTON
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  final income =
-                      double.tryParse(_incomeController.text) ?? 0;
-                  final expense =
-                      double.tryParse(_expenseController.text) ?? 0;
-
-                  final transaction = {
-                    'income': income,
-                    'expense': expense,
-                    'category': _categoryController.text,
-                    'note': _noteController.text,
-
-                    // ✅ FIXED TIME (ALWAYS LOCAL + CORRECT)
-                    'date': DateTime.now().toLocal(),
-                  };
-
-                  Navigator.pop(context, transaction);
-                },
-                child: const Text('Save Transaction'),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

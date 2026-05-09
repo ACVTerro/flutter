@@ -1,10 +1,21 @@
 import 'package:flutter/material.dart';
+import 'dart:io' show Platform;
 import 'package:tipidbuddy/about.dart';
 import 'package:tipidbuddy/stats.dart';
 import 'package:tipidbuddy/transaction.dart';
+import 'package:tipidbuddy/backend/database/init_db.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
-void main() {
-  runApp(MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
+  }
+
+  await DatabaseInitializer.init();
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
