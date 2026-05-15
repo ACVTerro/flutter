@@ -112,7 +112,7 @@ class _TransactionPageState extends State<TransactionPage>
             TabBar(
               controller: _tabController,
               dividerColor: Colors.transparent,
-              indicatorColor: const Color(0xFFA5B4FC),
+              indicatorColor: const Color(0xFFBBBBBB),
               unselectedLabelColor: Colors.white70,
               labelColor: Colors.white,
               tabs: const [
@@ -122,7 +122,7 @@ class _TransactionPageState extends State<TransactionPage>
               ],
             ),
             Container(
-              color: const Color(0xFF151C33),
+              color: const Color(0xFF1E1E1E),
               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
               width: double.infinity,
               child: Row(
@@ -151,7 +151,7 @@ class _TransactionPageState extends State<TransactionPage>
                       const Text('Total', style: TextStyle(color: Colors.white70, fontSize: 12)),
                       Text(
                         '₱${(_totalIncome - _totalExpense).toStringAsFixed(2)}',
-                        style: const TextStyle(color: Color(0xFFA5B4FC), fontWeight: FontWeight.bold),
+                        style: const TextStyle(color: Color(0xFFBBBBBB), fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
@@ -170,7 +170,7 @@ class _TransactionPageState extends State<TransactionPage>
                             if (index == 0) {
                               return Container(
                                 padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-                                color: const Color(0xFF1E2745),
+                                color: const Color(0xFF2C2C2C),
                                 child: const Row(
                                   children: [
                                     Expanded(flex: 2, child: Text('Category')),
@@ -231,6 +231,19 @@ class _TransactionPageState extends State<TransactionPage>
                     firstDay: DateTime.utc(2020, 1, 1),
                     lastDay: DateTime.utc(2030, 12, 31),
                     focusedDay: DateTime.now(),
+                    headerStyle: const HeaderStyle(
+                      formatButtonVisible: false,
+                      titleCentered: true,
+                      headerMargin: EdgeInsets.only(bottom: 10),
+                    ),
+                    calendarStyle: const CalendarStyle(
+                      weekendTextStyle: TextStyle(color: Colors.white70),
+                      defaultTextStyle: TextStyle(color: Colors.white),
+                    ),
+                    daysOfWeekStyle: const DaysOfWeekStyle(
+                      weekdayStyle: TextStyle(color: Colors.white70),
+                      weekendStyle: TextStyle(color: Colors.white70),
+                    ),
                   ),
                   Column(
                     children: [
@@ -241,7 +254,7 @@ class _TransactionPageState extends State<TransactionPage>
                                 itemCount: _notes.length,
                                 itemBuilder: (context, index) {
                                   return ListTile(
-                                    leading: const Icon(Icons.note),
+                                    leading: const Icon(Icons.note, color: Color(0xFFBBBBBB)),
                                     title: Text(_notes[index]),
                                   );
                                 },
@@ -289,57 +302,43 @@ class _TransactionPageState extends State<TransactionPage>
   }
 
   Widget _buildHeader(BuildContext context) {
-    return Card(
-      elevation: 0,
-      color: const Color(0xFF151C33),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1E2745),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(
-                Icons.receipt_long_outlined,
-                color: Color(0xFFA5B4FC),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Transactions',
-                    style: Theme.of(
-                      context,
-                    ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Transactions',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Manage daily entries, calendar, and notes.',
-                    style: Theme.of(context).textTheme.bodySmall,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Manage daily entries, calendar, and notes.',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Colors.white70,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-            IconButton(
-              icon: const Icon(Icons.search),
-              onPressed: () {
-                if (_tabController.index == 0) {
-                  showSearch(
-                    context: context,
-                    delegate: DailySearchDelegate(dailyItems: _dailyItems),
-                  );
-                }
-              },
-            ),
-          ],
-        ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.search, color: Color(0xFFBBBBBB)),
+            onPressed: () {
+              if (_tabController.index == 0) {
+                showSearch(
+                  context: context,
+                  delegate: DailySearchDelegate(dailyItems: _dailyItems),
+                );
+              }
+            },
+          ),
+        ],
       ),
     );
   }

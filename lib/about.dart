@@ -50,41 +50,26 @@ class AboutPage extends StatelessWidget {
   }
 
   Widget _buildHeader(BuildContext context) {
-    return Card(
-      elevation: 0,
-      color: const Color(0xFF151C33),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1E2745),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(Icons.info_outline, color: Color(0xFFA5B4FC)),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'About',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'About',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Help, settings, recommendations, and app credits.',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
-              ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Help, settings, recommendations, and app credits.',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Colors.white70,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -98,16 +83,16 @@ class AboutPage extends StatelessWidget {
   }) {
     return Card(
       elevation: 0,
-      color: const Color(0xFF151C33),
+      color: const Color(0xFF1E1E1E),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
         child: ListTile(
-          leading: Icon(icon, color: const Color(0xFFA5B4FC)),
-          title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
-          subtitle: Text(subtitle),
-          trailing: const Icon(Icons.chevron_right_rounded),
+          leading: Icon(icon, color: const Color(0xFFBBBBBB)),
+          title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.white)),
+          subtitle: Text(subtitle, style: const TextStyle(color: Colors.white70)),
+          trailing: const Icon(Icons.chevron_right_rounded, color: Color(0xFFBBBBBB)),
         ),
       ),
     );
@@ -117,7 +102,8 @@ class AboutPage extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Help'),
+        backgroundColor: const Color(0xFF1E1E1E),
+        title: const Text('Help', style: TextStyle(color: Colors.white)),
         content: const Text(
           'To add a transaction:\n'
           '1. Tap "Add Transaction" button.\n'
@@ -127,9 +113,13 @@ class AboutPage extends StatelessWidget {
           'To view transactions, go to the "Transactions" tab.\n'
           'Use the search icon to find specific categories.\n\n'
           'Stats page shows your monthly income vs expenses.',
+          style: TextStyle(color: Colors.white70),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close', style: TextStyle(color: Color(0xFFBBBBBB))),
+          ),
         ],
       ),
     );
@@ -139,16 +129,21 @@ class AboutPage extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Settings'),
+        backgroundColor: const Color(0xFF1E1E1E),
+        title: const Text('Settings', style: TextStyle(color: Colors.white)),
         content: const Text(
           'TipidBuddy features coming soon:\n'
           '- Change currency (PHP, USD, etc.)\n'
           '- Enable notifications for budget limits\n'
           '- Dark/Light theme toggle\n'
           '- Export data to CSV',
+          style: TextStyle(color: Colors.white70),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close', style: TextStyle(color: Color(0xFFBBBBBB))),
+          ),
         ],
       ),
     );
@@ -158,16 +153,21 @@ class AboutPage extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Recommendations'),
+        backgroundColor: const Color(0xFF1E1E1E),
+        title: const Text('Recommendations', style: TextStyle(color: Colors.white)),
         content: const Text(
           '• Track every expense, no matter how small.\n'
           '• Set a monthly budget and stick to it.\n'
           '• Use the 50/30/20 rule: 50% needs, 30% wants, 20% savings.\n'
           '• Review your stats regularly to spot trends.\n'
           '• Save first before spending – automate savings if possible.',
+          style: TextStyle(color: Colors.white70),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close', style: TextStyle(color: Color(0xFFBBBBBB))),
+          ),
         ],
       ),
     );
@@ -177,17 +177,22 @@ class AboutPage extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Credits'),
+        backgroundColor: const Color(0xFF1E1E1E),
+        title: const Text('Credits', style: TextStyle(color: Colors.white)),
         content: const Text(
           'TipidBuddy is developed by:\n\n'
           '• John Lei Cueto\n'
           '• Jean Mickel Manalo\n'
           '• Mark Angelo Vergara\n'
           '• Aaron Villacorta\n\n'
-          'Built with Flutter.',
+          'Built with Flutter and ❤️.',
+          style: TextStyle(color: Colors.white70),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close', style: TextStyle(color: Color(0xFFBBBBBB))),
+          ),
         ],
       ),
     );

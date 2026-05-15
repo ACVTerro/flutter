@@ -106,7 +106,12 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                     TextFormField(
                       controller: _amountController,
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(labelText: 'Amount', border: OutlineInputBorder()),
+                      decoration: const InputDecoration(
+                        labelText: 'Amount',
+                        border: OutlineInputBorder(),
+                        labelStyle: TextStyle(color: Colors.white70),
+                      ),
+                      style: const TextStyle(color: Colors.white),
                       validator: (value) {
                         if (value == null || value.isEmpty) return 'Enter amount';
                         if (double.tryParse(value) == null) return 'Enter valid number';
@@ -117,7 +122,13 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                     DropdownButtonFormField<CategoriesModel>(
                       value: _selectedCategory,
                       isExpanded: true,
-                      decoration: const InputDecoration(labelText: 'Category', border: OutlineInputBorder()),
+                      decoration: const InputDecoration(
+                        labelText: 'Category',
+                        border: OutlineInputBorder(),
+                        labelStyle: TextStyle(color: Colors.white70),
+                      ),
+                      dropdownColor: const Color(0xFF1E1E1E),
+                      style: const TextStyle(color: Colors.white),
                       items: (_type == 'income' ? _incomeCategories : _expenseCategories).map((c) {
                         return DropdownMenuItem(value: c, child: Text(c.label));
                       }).toList(),
@@ -127,14 +138,19 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                     const SizedBox(height: 12),
                     TextFormField(
                       controller: _noteController,
-                      decoration: const InputDecoration(labelText: 'Note (optional)', border: OutlineInputBorder()),
+                      decoration: const InputDecoration(
+                        labelText: 'Note (optional)',
+                        border: OutlineInputBorder(),
+                        labelStyle: TextStyle(color: Colors.white70),
+                      ),
+                      style: const TextStyle(color: Colors.white),
                       maxLines: null,
                     ),
                     const SizedBox(height: 12),
                     ListTile(
-                      title: const Text('Date'),
-                      subtitle: Text(DateFormat('MMMM d, yyyy').format(_date)),
-                      trailing: const Icon(Icons.calendar_today),
+                      title: const Text('Date', style: TextStyle(color: Colors.white70)),
+                      subtitle: Text(DateFormat('MMMM d, yyyy').format(_date), style: const TextStyle(color: Colors.white)),
+                      trailing: const Icon(Icons.calendar_today, color: Color(0xFFBBBBBB)),
                       onTap: () async {
                         final picked = await showDatePicker(
                           context: context,

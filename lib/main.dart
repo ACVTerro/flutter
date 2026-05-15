@@ -28,10 +28,47 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF0B1020),
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF4F46E5),
-          brightness: Brightness.dark,
+        scaffoldBackgroundColor: const Color(0xFF121212),
+        colorScheme: const ColorScheme.dark(
+          primary: Color(0xFF3A3A3A),
+          secondary: Color(0xFF4A4A4A),
+          surface: Color(0xFF1E1E1E),
+          background: Color(0xFF121212),
+          error: Color(0xFFCF6679),
+          onPrimary: Colors.white,
+          onSecondary: Colors.white,
+          onSurface: Colors.white,
+          onBackground: Colors.white,
+          onError: Colors.black,
+        ),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF1E1E1E),
+          foregroundColor: Colors.white,
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF3A3A3A),
+            foregroundColor: Colors.white,
+            disabledBackgroundColor: const Color(0xFF2C2C2C),
+            disabledForegroundColor: Colors.white70,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            foregroundColor: const Color(0xFFBBBBBB),
+          ),
+        ),
+        segmentedButtonTheme: SegmentedButtonThemeData(
+          style: SegmentedButton.styleFrom(
+            selectedBackgroundColor: const Color(0xFF3A3A3A),
+            selectedForegroundColor: Colors.white,
+            backgroundColor: const Color(0xFF2C2C2C),
+            foregroundColor: Colors.white70,
+            elevation: 0,
+          ),
         ),
       ),
       home: const MyHomePage(),
@@ -66,6 +103,10 @@ class _MyHomePageState extends State<MyHomePage> {
             _currentIndex = index;
           });
         },
+        backgroundColor: const Color(0xFF1E1E1E),
+        surfaceTintColor: Colors.transparent,
+        indicatorColor: const Color(0xFFBBBBBB),
+        labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.receipt_long_outlined),

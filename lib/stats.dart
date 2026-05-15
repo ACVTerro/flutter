@@ -61,55 +61,36 @@ class _StatsPageState extends State<StatsPage> {
   }
 
   Widget _buildHeader(BuildContext context) {
-    return Card(
-      elevation: 0,
-      color: const Color(0xFF151C33),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1E2745),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(
-                Icons.bar_chart_rounded,
-                color: Color(0xFFA5B4FC),
-              ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Statistics',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Statistics',
-                    style: Theme.of(
-                      context,
-                    ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Visualize monthly income and spending trends.',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
-              ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Visualize monthly income and spending trends.',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Colors.white70,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildGraphCard(BuildContext context) {
     if (_monthlyStats.isEmpty) {
-      return const Card(
-        color: Color(0xFF151C33),
-        child: Padding(
+      return Card(
+        color: const Color(0xFF1E1E1E),
+        elevation: 0,
+        child: const Padding(
           padding: EdgeInsets.all(16),
           child: Center(child: Text('No data yet')),
         ),
@@ -121,7 +102,7 @@ class _StatsPageState extends State<StatsPage> {
 
     return Card(
       elevation: 0,
-      color: const Color(0xFF151C33),
+      color: const Color(0xFF1E1E1E),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -130,9 +111,10 @@ class _StatsPageState extends State<StatsPage> {
           children: [
             Text(
               'Income vs Expenses',
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
             ),
             const SizedBox(height: 18),
             SizedBox(
@@ -163,7 +145,7 @@ class _StatsPageState extends State<StatsPage> {
   Widget _buildMonthlyTable() {
     return Card(
       elevation: 0,
-      color: const Color(0xFF151C33),
+      color: const Color(0xFF1E1E1E),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       child: Padding(
         padding: const EdgeInsets.all(12),
@@ -176,15 +158,15 @@ class _StatsPageState extends State<StatsPage> {
               total: 'Total',
               isHeader: true,
             ),
-            const Divider(height: 14, color: Color(0xFF1E2745)),
+            const Divider(height: 14, color: Color(0xFF2C2C2C)),
             ..._monthlyStats.map((entry) {
               return Padding(
                 padding: const EdgeInsets.only(bottom: 8),
                 child: _TableRow(
                   month: entry.month,
-                  income: 'P${entry.income.toStringAsFixed(0)}',
-                  expenses: 'P${entry.expenses.toStringAsFixed(0)}',
-                  total: 'P${entry.total.toStringAsFixed(0)}',
+                  income: '₱${entry.income.toStringAsFixed(0)}',
+                  expenses: '₱${entry.expenses.toStringAsFixed(0)}',
+                  total: '₱${entry.total.toStringAsFixed(0)}',
                 ),
               );
             }),
@@ -241,7 +223,7 @@ class _TableRow extends StatelessWidget {
             total,
             textAlign: TextAlign.end,
             style: baseStyle.copyWith(
-              color: isHeader ? Colors.white : const Color(0xFFA5B4FC),
+              color: isHeader ? Colors.white : const Color(0xFFBBBBBB),
             ),
           ),
         ),
@@ -266,7 +248,7 @@ class _LegendDot extends StatelessWidget {
           decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: 6),
-        Text(label),
+        Text(label, style: const TextStyle(color: Colors.white70)),
       ],
     );
   }
@@ -280,7 +262,6 @@ class _MonthBars extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Use absolute value of maxValue for scaling, and clamp ratios between 0 and 1
     final positiveMax = maxValue.abs();
     double incomeRatio = 0.0;
     double expenseRatio = 0.0;
@@ -318,7 +299,7 @@ class _MonthBars extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        Text(entry.month),
+        Text(entry.month, style: const TextStyle(color: Colors.white70)),
       ],
     );
   }
