@@ -126,11 +126,35 @@ class _TransactionPageState extends State<TransactionPage>
               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
               width: double.infinity,
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  Text('Income: ${_totalIncome.toStringAsFixed(2)}', style: const TextStyle(color: Color(0xFF22C55E))),
-                  Text('Expenses: ${_totalExpense.toStringAsFixed(2)}', style: const TextStyle(color: Color(0xFFEF4444))),
-                  Text('Total: ${(_totalIncome - _totalExpense).toStringAsFixed(2)}'),
+                  Column(
+                    children: [
+                      const Text('Income', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                      Text(
+                        '₱${_totalIncome.toStringAsFixed(2)}',
+                        style: const TextStyle(color: Color(0xFF22C55E), fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                  Column(
+                    children: [
+                      const Text('Expenses', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                      Text(
+                        '₱${_totalExpense.toStringAsFixed(2)}',
+                        style: const TextStyle(color: Color(0xFFEF4444), fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                  Column(
+                    children: [
+                      const Text('Total', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                      Text(
+                        '₱${(_totalIncome - _totalExpense).toStringAsFixed(2)}',
+                        style: const TextStyle(color: Color(0xFFA5B4FC), fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),

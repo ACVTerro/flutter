@@ -83,7 +83,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
       appBar: AppBar(title: const Text('Add Transaction')),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
-          : Padding(
+          : SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Form(
                 key: _formKey,
@@ -128,6 +128,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                     TextFormField(
                       controller: _noteController,
                       decoration: const InputDecoration(labelText: 'Note (optional)', border: OutlineInputBorder()),
+                      maxLines: null,
                     ),
                     const SizedBox(height: 12),
                     ListTile(
@@ -144,7 +145,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                         if (picked != null) setState(() => _date = picked);
                       },
                     ),
-                    const Spacer(),
+                    const SizedBox(height: 24),
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
@@ -152,6 +153,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                         child: const Text('Save Transaction'),
                       ),
                     ),
+                    const SizedBox(height: 32),
                   ],
                 ),
               ),
