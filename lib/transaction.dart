@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:tipidbuddy/search.dart';
 import 'package:tipidbuddy/add_transaction_page.dart';
 import 'package:tipidbuddy/backend/services/transactions_services.dart';
+import 'package:tipidbuddy/theme/app_theme.dart';
 import 'package:intl/intl.dart';
 
 class TransactionPage extends StatefulWidget {
@@ -20,13 +20,6 @@ class _TransactionPageState extends State<TransactionPage>
   double _totalExpense = 0;
   bool _loading = true;
 
-  final List<String> _dailyItems = [
-    'Salary',
-    'Freelance',
-    'Groceries',
-    'Rent',
-    'Utilities',
-  ];
   final List<String> _notes = [];
 
   @override
@@ -70,26 +63,22 @@ class _TransactionPageState extends State<TransactionPage>
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Add Note'),
+          backgroundColor: Theme.of(context).cardColor,
+          title: Text('Add Note', style: TextStyle(color: Theme.of(context).textTheme.titleLarge?.color)),
           content: TextField(
             autofocus: true,
-            onChanged: (value) {
-              newNote = value;
-            },
-            decoration: const InputDecoration(hintText: 'Type your note here'),
+            onChanged: (value) => newNote = value,
+            decoration: InputDecoration(hintText: 'Type your note here'),
+            style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: Text('Cancel', style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color)),
             ),
             ElevatedButton(
               onPressed: () {
-                if (newNote.isNotEmpty) {
-                  setState(() {
-                    _notes.add(newNote);
-                  });
-                }
+                if (newNote.isNotEmpty) setState(() => _notes.add(newNote));
                 Navigator.pop(context);
               },
               child: const Text('Add'),
@@ -102,56 +91,70 @@ class _TransactionPageState extends State<TransactionPage>
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildHeader(context),
             const SizedBox(height: 8),
             TabBar(
               controller: _tabController,
               dividerColor: Colors.transparent,
-              indicatorColor: const Color(0xFFBBBBBB),
-              unselectedLabelColor: Colors.white70,
-              labelColor: Colors.white,
+              indicatorColor: isDark ? const Color(0xFFBBBBBB) : Colors.grey,
+              unselectedLabelColor: isDark ? Colors.white70 : Colors.grey[600],
+              labelColor: isDark ? Colors.white : Colors.black87,
               tabs: const [
                 Tab(text: 'Daily'),
                 Tab(text: 'Calendar'),
                 Tab(text: 'Notes'),
               ],
             ),
+            // Centered summary row
             Container(
-              color: const Color(0xFF1E1E1E),
+              color: Theme.of(context).cardColor,
               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
               width: double.infinity,
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  // Income
                   Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      const Text('Income', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                      Text('Income', style: TextStyle(color: Theme.of(context).textTheme.bodySmall?.color)),
                       Text(
                         '₱${_totalIncome.toStringAsFixed(2)}',
-                        style: const TextStyle(color: Color(0xFF22C55E), fontWeight: FontWeight.bold),
+                        style: const TextStyle(color: AppTheme.incomeGreen, fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
+                  const SizedBox(width: 32),
+                  // Expenses
                   Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      const Text('Expenses', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                      Text('Expenses', style: TextStyle(color: Theme.of(context).textTheme.bodySmall?.color)),
                       Text(
                         '₱${_totalExpense.toStringAsFixed(2)}',
-                        style: const TextStyle(color: Color(0xFFEF4444), fontWeight: FontWeight.bold),
+                        style: const TextStyle(color: AppTheme.expenseRed, fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
+                  const SizedBox(width: 32),
+                  // Total
                   Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      const Text('Total', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                      Text('Total', style: TextStyle(color: Theme.of(context).textTheme.bodySmall?.color)),
                       Text(
                         '₱${(_totalIncome - _totalExpense).toStringAsFixed(2)}',
-                        style: const TextStyle(color: Color(0xFFBBBBBB), fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          color: isDark ? const Color(0xFFBBBBBB) : Colors.grey[700],
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
@@ -170,13 +173,13 @@ class _TransactionPageState extends State<TransactionPage>
                             if (index == 0) {
                               return Container(
                                 padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-                                color: const Color(0xFF2C2C2C),
-                                child: const Row(
+                                color: isDark ? const Color(0xFF2C2C2C) : Colors.grey[200],
+                                child: Row(
                                   children: [
-                                    Expanded(flex: 2, child: Text('Category')),
-                                    Expanded(flex: 3, child: Text('Note')),
-                                    Expanded(flex: 2, child: Text('Income', textAlign: TextAlign.right)),
-                                    Expanded(flex: 2, child: Text('Expense', textAlign: TextAlign.right)),
+                                    Expanded(flex: 2, child: Text('Category', style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color))),
+                                    Expanded(flex: 3, child: Text('Note', style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color))),
+                                    Expanded(flex: 2, child: Text('Income', textAlign: TextAlign.right, style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color))),
+                                    Expanded(flex: 2, child: Text('Expense', textAlign: TextAlign.right, style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color))),
                                   ],
                                 ),
                               );
@@ -195,21 +198,21 @@ class _TransactionPageState extends State<TransactionPage>
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                   child: Text(
                                     DateFormat('MMMM d, yyyy').format(date),
-                                    style: const TextStyle(fontSize: 12, color: Colors.white70),
+                                    style: TextStyle(fontSize: 12, color: isDark ? Colors.white70 : Colors.grey[600]),
                                   ),
                                 ),
                                 Container(
                                   padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
                                   child: Row(
                                     children: [
-                                      Expanded(flex: 2, child: Text(categoryName)),
-                                      Expanded(flex: 3, child: Text(note)),
+                                      Expanded(flex: 2, child: Text(categoryName, style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color))),
+                                      Expanded(flex: 3, child: Text(note, style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color))),
                                       Expanded(
                                         flex: 2,
                                         child: Text(
                                           isIncome ? amount.toStringAsFixed(2) : '',
                                           textAlign: TextAlign.right,
-                                          style: const TextStyle(color: Color(0xFF22C55E)),
+                                          style: const TextStyle(color: AppTheme.incomeGreen),
                                         ),
                                       ),
                                       Expanded(
@@ -217,7 +220,7 @@ class _TransactionPageState extends State<TransactionPage>
                                         child: Text(
                                           !isIncome ? amount.toStringAsFixed(2) : '',
                                           textAlign: TextAlign.right,
-                                          style: const TextStyle(color: Color(0xFFEF4444)),
+                                          style: const TextStyle(color: AppTheme.expenseRed),
                                         ),
                                       ),
                                     ],
@@ -231,31 +234,32 @@ class _TransactionPageState extends State<TransactionPage>
                     firstDay: DateTime.utc(2020, 1, 1),
                     lastDay: DateTime.utc(2030, 12, 31),
                     focusedDay: DateTime.now(),
-                    headerStyle: const HeaderStyle(
+                    headerStyle: HeaderStyle(
                       formatButtonVisible: false,
                       titleCentered: true,
-                      headerMargin: EdgeInsets.only(bottom: 10),
+                      headerMargin: const EdgeInsets.only(bottom: 10),
+                      titleTextStyle: TextStyle(color: Theme.of(context).textTheme.titleMedium?.color),
                     ),
-                    calendarStyle: const CalendarStyle(
-                      weekendTextStyle: TextStyle(color: Colors.white70),
-                      defaultTextStyle: TextStyle(color: Colors.white),
+                    calendarStyle: CalendarStyle(
+                      weekendTextStyle: TextStyle(color: isDark ? Colors.white70 : Colors.grey[600]),
+                      defaultTextStyle: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black),
                     ),
-                    daysOfWeekStyle: const DaysOfWeekStyle(
-                      weekdayStyle: TextStyle(color: Colors.white70),
-                      weekendStyle: TextStyle(color: Colors.white70),
+                    daysOfWeekStyle: DaysOfWeekStyle(
+                      weekdayStyle: TextStyle(color: isDark ? Colors.white70 : Colors.grey[600]),
+                      weekendStyle: TextStyle(color: isDark ? Colors.white70 : Colors.grey[600]),
                     ),
                   ),
                   Column(
                     children: [
                       Expanded(
                         child: _notes.isEmpty
-                            ? const Center(child: Text('No notes yet'))
+                            ? Center(child: Text('No notes yet', style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color)))
                             : ListView.builder(
                                 itemCount: _notes.length,
                                 itemBuilder: (context, index) {
                                   return ListTile(
-                                    leading: const Icon(Icons.note, color: Color(0xFFBBBBBB)),
-                                    title: Text(_notes[index]),
+                                    leading: Icon(Icons.note, color: isDark ? const Color(0xFFBBBBBB) : Colors.grey[700]),
+                                    title: Text(_notes[index], style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color)),
                                   );
                                 },
                               ),
@@ -287,9 +291,7 @@ class _TransactionPageState extends State<TransactionPage>
                         context,
                         MaterialPageRoute(builder: (context) => const AddTransactionPage()),
                       );
-                      if (result == true) {
-                        _loadData();
-                      }
+                      if (result == true) _loadData();
                     },
                     child: const Text('Add Transaction'),
                   ),
@@ -304,39 +306,21 @@ class _TransactionPageState extends State<TransactionPage>
   Widget _buildHeader(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Transactions',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Manage daily entries, calendar, and notes.',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.white70,
-                  ),
-                ),
-              ],
-            ),
+          Text(
+            'Transactions',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
           ),
-          IconButton(
-            icon: const Icon(Icons.search, color: Color(0xFFBBBBBB)),
-            onPressed: () {
-              if (_tabController.index == 0) {
-                showSearch(
-                  context: context,
-                  delegate: DailySearchDelegate(dailyItems: _dailyItems),
-                );
-              }
-            },
+          const SizedBox(height: 4),
+          Text(
+            'Manage daily entries, calendar, and notes.',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white70
+                      : Colors.grey[600],
+                ),
           ),
         ],
       ),

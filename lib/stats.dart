@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tipidbuddy/backend/services/transactions_services.dart';
+import 'package:tipidbuddy/theme/app_theme.dart';
 import 'package:intl/intl.dart';
 
 class StatsPage extends StatefulWidget {
@@ -53,7 +54,7 @@ class _StatsPageState extends State<StatsPage> {
                   const SizedBox(height: 12),
                   _buildGraphCard(context),
                   const SizedBox(height: 16),
-                  _buildMonthlyTable(),
+                  _buildMonthlyTable(context),
                 ],
               ),
       ),
@@ -68,17 +69,16 @@ class _StatsPageState extends State<StatsPage> {
         children: [
           Text(
             'Statistics',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 4),
           Text(
             'Visualize monthly income and spending trends.',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.white70,
-            ),
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white70
+                      : Colors.grey[600],
+                ),
           ),
         ],
       ),
@@ -86,9 +86,10 @@ class _StatsPageState extends State<StatsPage> {
   }
 
   Widget _buildGraphCard(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     if (_monthlyStats.isEmpty) {
       return Card(
-        color: const Color(0xFF1E1E1E),
+        color: Theme.of(context).cardColor,
         elevation: 0,
         child: const Padding(
           padding: EdgeInsets.all(16),
@@ -102,7 +103,7 @@ class _StatsPageState extends State<StatsPage> {
 
     return Card(
       elevation: 0,
-      color: const Color(0xFF1E1E1E),
+      color: Theme.of(context).cardColor,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -111,10 +112,7 @@ class _StatsPageState extends State<StatsPage> {
           children: [
             Text(
               'Income vs Expenses',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 18),
             SizedBox(
@@ -123,17 +121,17 @@ class _StatsPageState extends State<StatsPage> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: _monthlyStats
                     .map((entry) => Expanded(
-                          child: _MonthBars(entry: entry, maxValue: maxValue),
+                          child: _MonthBars(entry: entry, maxValue: maxValue, isDark: isDark),
                         ))
                     .toList(),
               ),
             ),
             const SizedBox(height: 8),
-            const Row(
+            Row(
               children: [
-                _LegendDot(color: Color(0xFF22C55E), label: 'Income'),
-                SizedBox(width: 14),
-                _LegendDot(color: Color(0xFFEF4444), label: 'Expenses'),
+                _LegendDot(color: AppTheme.incomeGreen, label: 'Income'),
+                const SizedBox(width: 14),
+                _LegendDot(color: AppTheme.expenseRed, label: 'Expenses'),
               ],
             ),
           ],
@@ -142,23 +140,25 @@ class _StatsPageState extends State<StatsPage> {
     );
   }
 
-  Widget _buildMonthlyTable() {
+  Widget _buildMonthlyTable(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Card(
       elevation: 0,
-      color: const Color(0xFF1E1E1E),
+      color: Theme.of(context).cardColor,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
           children: [
-            const _TableRow(
+            _TableRow(
               month: 'Month',
               income: 'Income',
               expenses: 'Expenses',
               total: 'Total',
               isHeader: true,
+              isDark: isDark,
             ),
-            const Divider(height: 14, color: Color(0xFF2C2C2C)),
+            Divider(height: 14, color: isDark ? const Color(0xFF2C2C2C) : Colors.grey[300]),
             ..._monthlyStats.map((entry) {
               return Padding(
                 padding: const EdgeInsets.only(bottom: 8),
@@ -167,6 +167,7 @@ class _StatsPageState extends State<StatsPage> {
                   income: '₱${entry.income.toStringAsFixed(0)}',
                   expenses: '₱${entry.expenses.toStringAsFixed(0)}',
                   total: '₱${entry.total.toStringAsFixed(0)}',
+                  isDark: isDark,
                 ),
               );
             }),
@@ -183,6 +184,7 @@ class _TableRow extends StatelessWidget {
   final String expenses;
   final String total;
   final bool isHeader;
+  final bool isDark;
 
   const _TableRow({
     required this.month,
@@ -190,13 +192,16 @@ class _TableRow extends StatelessWidget {
     required this.expenses,
     required this.total,
     this.isHeader = false,
+    required this.isDark,
   });
 
   @override
   Widget build(BuildContext context) {
     final baseStyle = TextStyle(
       fontWeight: isHeader ? FontWeight.w700 : FontWeight.w500,
-      color: isHeader ? Colors.white : Colors.white70,
+      color: isHeader
+          ? (isDark ? Colors.white : Colors.black87)
+          : (isDark ? Colors.white70 : Colors.grey[700]),
     );
 
     return Row(
@@ -206,7 +211,7 @@ class _TableRow extends StatelessWidget {
           child: Text(
             income,
             style: baseStyle.copyWith(
-              color: isHeader ? Colors.white : const Color(0xFF22C55E),
+              color: isHeader ? (isDark ? Colors.white : Colors.black87) : AppTheme.incomeGreen,
             ),
           ),
         ),
@@ -214,7 +219,7 @@ class _TableRow extends StatelessWidget {
           child: Text(
             expenses,
             style: baseStyle.copyWith(
-              color: isHeader ? Colors.white : const Color(0xFFEF4444),
+              color: isHeader ? (isDark ? Colors.white : Colors.black87) : AppTheme.expenseRed,
             ),
           ),
         ),
@@ -223,7 +228,7 @@ class _TableRow extends StatelessWidget {
             total,
             textAlign: TextAlign.end,
             style: baseStyle.copyWith(
-              color: isHeader ? Colors.white : const Color(0xFFBBBBBB),
+              color: isHeader ? (isDark ? Colors.white : Colors.black87) : (isDark ? const Color(0xFFBBBBBB) : Colors.grey[700]),
             ),
           ),
         ),
@@ -242,13 +247,9 @@ class _LegendDot extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Container(
-          width: 10,
-          height: 10,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-        ),
+        Container(width: 10, height: 10, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
         const SizedBox(width: 6),
-        Text(label, style: const TextStyle(color: Colors.white70)),
+        Text(label, style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color)),
       ],
     );
   }
@@ -257,8 +258,9 @@ class _LegendDot extends StatelessWidget {
 class _MonthBars extends StatelessWidget {
   final _MonthlyStat entry;
   final double maxValue;
+  final bool isDark;
 
-  const _MonthBars({required this.entry, required this.maxValue});
+  const _MonthBars({required this.entry, required this.maxValue, required this.isDark});
 
   @override
   Widget build(BuildContext context) {
@@ -278,28 +280,14 @@ class _MonthBars extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Container(
-                width: 12,
-                height: 130 * incomeRatio,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF22C55E),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-              ),
+              Container(width: 12, height: 130 * incomeRatio, decoration: BoxDecoration(color: AppTheme.incomeGreen, borderRadius: BorderRadius.circular(6))),
               const SizedBox(width: 6),
-              Container(
-                width: 12,
-                height: 130 * expenseRatio,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFEF4444),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-              ),
+              Container(width: 12, height: 130 * expenseRatio, decoration: BoxDecoration(color: AppTheme.expenseRed, borderRadius: BorderRadius.circular(6))),
             ],
           ),
         ),
         const SizedBox(height: 8),
-        Text(entry.month, style: const TextStyle(color: Colors.white70)),
+        Text(entry.month, style: TextStyle(color: isDark ? Colors.white70 : Colors.grey[700])),
       ],
     );
   }
@@ -309,8 +297,6 @@ class _MonthlyStat {
   final String month;
   final double income;
   final double expenses;
-
   const _MonthlyStat({required this.month, required this.income, required this.expenses});
-
   double get total => income - expenses;
 }

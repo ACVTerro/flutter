@@ -79,6 +79,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       appBar: AppBar(title: const Text('Add Transaction')),
       body: _loading
@@ -106,12 +107,12 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                     TextFormField(
                       controller: _amountController,
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: 'Amount',
-                        border: OutlineInputBorder(),
-                        labelStyle: TextStyle(color: Colors.white70),
+                        border: const OutlineInputBorder(),
+                        labelStyle: TextStyle(color: isDark ? Colors.white70 : Colors.grey[700]),
                       ),
-                      style: const TextStyle(color: Colors.white),
+                      style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
                       validator: (value) {
                         if (value == null || value.isEmpty) return 'Enter amount';
                         if (double.tryParse(value) == null) return 'Enter valid number';
@@ -122,13 +123,13 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                     DropdownButtonFormField<CategoriesModel>(
                       value: _selectedCategory,
                       isExpanded: true,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: 'Category',
-                        border: OutlineInputBorder(),
-                        labelStyle: TextStyle(color: Colors.white70),
+                        border: const OutlineInputBorder(),
+                        labelStyle: TextStyle(color: isDark ? Colors.white70 : Colors.grey[700]),
                       ),
-                      dropdownColor: const Color(0xFF1E1E1E),
-                      style: const TextStyle(color: Colors.white),
+                      dropdownColor: Theme.of(context).cardColor,
+                      style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
                       items: (_type == 'income' ? _incomeCategories : _expenseCategories).map((c) {
                         return DropdownMenuItem(value: c, child: Text(c.label));
                       }).toList(),
@@ -138,19 +139,22 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                     const SizedBox(height: 12),
                     TextFormField(
                       controller: _noteController,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: 'Note (optional)',
-                        border: OutlineInputBorder(),
-                        labelStyle: TextStyle(color: Colors.white70),
+                        border: const OutlineInputBorder(),
+                        labelStyle: TextStyle(color: isDark ? Colors.white70 : Colors.grey[700]),
                       ),
-                      style: const TextStyle(color: Colors.white),
+                      style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
                       maxLines: null,
                     ),
                     const SizedBox(height: 12),
                     ListTile(
-                      title: const Text('Date', style: TextStyle(color: Colors.white70)),
-                      subtitle: Text(DateFormat('MMMM d, yyyy').format(_date), style: const TextStyle(color: Colors.white)),
-                      trailing: const Icon(Icons.calendar_today, color: Color(0xFFBBBBBB)),
+                      title: Text('Date', style: TextStyle(color: isDark ? Colors.white70 : Colors.grey[700])),
+                      subtitle: Text(
+                        DateFormat('MMMM d, yyyy').format(_date),
+                        style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
+                      ),
+                      trailing: Icon(Icons.calendar_today, color: Theme.of(context).iconTheme.color),
                       onTap: () async {
                         final picked = await showDatePicker(
                           context: context,
