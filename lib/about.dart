@@ -6,7 +6,6 @@ class AboutPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -14,7 +13,7 @@ class AboutPage extends StatelessWidget {
           children: [
             _buildHeader(context),
             const SizedBox(height: 12),
-            // Configuration / Settings (now first)
+            // Configuration / Settings
             _buildAboutItem(
               context,
               icon: Icons.settings_suggest_outlined,
@@ -23,7 +22,7 @@ class AboutPage extends StatelessWidget {
               onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsPage())),
             ),
             const SizedBox(height: 12),
-            // Help (now second)
+            // Help
             _buildAboutItem(
               context,
               icon: Icons.help_outline_rounded,

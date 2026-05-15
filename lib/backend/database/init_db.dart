@@ -1,4 +1,3 @@
-import 'package:tipidbuddy/backend/database/db.dart';
 import 'package:tipidbuddy/backend/models/categories.dart';
 import 'package:tipidbuddy/backend/services/categories_services.dart';
 

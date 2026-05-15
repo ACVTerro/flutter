@@ -112,7 +112,6 @@ class _TransactionPageState extends State<TransactionPage>
                 Tab(text: 'Notes'),
               ],
             ),
-            // Centered summary row
             Container(
               color: Theme.of(context).cardColor,
               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
